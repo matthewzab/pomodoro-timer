@@ -1,38 +1,146 @@
+/* Reset default styles and set up the page */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f7f5f3;
+  color: #333;
+  height: 100vh;
+}
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  height: 100vh;
+  padding: 20px;
+}
+
+/* Main heading */
+h1 {
+  font-size: 2.5rem;
+  color: #d63384;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+/* Timer display */
+.timer-display {
+  font-size: 6rem;
+  font-weight: 200;
+  color: #d63384;
+  font-family: 'Courier New', monospace;
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(214, 51, 132, 0.1);
+  margin-bottom: 3rem;
+  min-width: 300px;
+  text-align: center;
+}
+
+/* Button container */
+.button-container {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Button styles */
+button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+/* Start button */
+.start-btn {
+  background-color: #d63384;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.start-btn:hover {
+  background-color: #b02a5b;
+  transform: translateY(-2px);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Pause button */
+.pause-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.pause-btn:hover {
+  background-color: #545b62;
+  transform: translateY(-2px);
+}
+
+/* Reset button */
+.reset-btn {
+  background-color: white;
+  color: #d63384;
+  border: 2px solid #d63384;
+}
+
+.reset-btn:hover {
+  background-color: #d63384;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Timer container with progress ring */
+.timer-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+/* SVG progress ring */
+.progress-ring {
+  position: absolute;
+  transform: rotate(-90deg); /* Start from top instead of right */
+}
+
+/* Background circle (light gray) */
+.progress-ring-background {
+  fill: none;
+  stroke: #e9ecef;
+  stroke-width: 8;
+}
+
+/* Progress circle (red, fills up as time goes down) */
+.progress-ring-circle {
+  fill: none;
+  stroke: #d63384;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* Update timer display to work with the ring */
+.timer-display {
+  font-size: 4rem;
+  font-weight: 200;
+  color: #d63384;
+  font-family: 'Courier New', monospace;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(214, 51, 132, 0.1);
+  min-width: 220px;
+  text-align: center;
+  z-index: 1;
+  position: relative;
 }
