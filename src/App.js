@@ -59,14 +59,13 @@ function App() {
           <div className="tomato-content">
             {timerState === 'initial' && <span className="start-text">START</span>}
             {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
-            {timerState === 'paused' && (
-              <>
-                <div className="pause-icon">⏸</div>
-                <span className="small-time">{formatTime(timeLeft)}</span>
-              </>
-            )}
+            {timerState === 'paused' && <div className="pause-icon">⏸</div>}
           </div>
         </div>
+
+        {timerState === 'paused' && (
+          <div className="external-timer">{formatTime(timeLeft)}</div>
+        )}
 
         <button className="reset-btn" onClick={handleReset}>Reset</button>
       </div>
