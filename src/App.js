@@ -5,6 +5,7 @@ function App() {
   // State variables
   const [timeLeft, setTimeLeft] = useState(1500);
   const [isRunning, setIsRunning] = useState(false);
+  const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
 
   // Functions
   const formatTime = (seconds) => {
@@ -12,6 +13,25 @@ function App() {
     const remainingSeconds = seconds % 60;
 
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const handleTomatoClick = () => {
+    if (timerState === 'initial') {
+      setTimerState('running');
+      setIsRunning(true);
+    } else if (timerState === 'running') {
+      setTimerState('paused');
+      setIsRunning(false);
+    } else if (timerState === 'paused') {
+      setTimerState('running');
+      setIsRunning(true);
+    }
+  };
+
+  const handleReset = () => {
+    setTimeLeft(1500);
+    setIsRunning(false);
+    setTimerState('initial');
   };
 
   // useEffect
@@ -32,31 +52,18 @@ function App() {
   return (
     <div className="App">
       <h1>Pomodoro Timer</h1>
-      <div className="timer-container">
-        <svg className="progress-ring" width="300" height="300">
-          <circle
-            className="progress-ring-background"
-            cx="150"
-            cy="150"
-            r="120"
-          />
-          <circle
-            className="progress-ring-circle"
-            cx="150"
-            cy="150"
-            r="120"
-            style={{
-              strokeDasharray: `${2 * Math.PI * 120}`,
-              strokeDashoffset: `${2 * Math.PI * 120 * (timeLeft / 1500)}`
-            }}
-          />
-        </svg>
-        <div className="timer-display">{formatTime(timeLeft)}</div>
-      </div>
-      <div className="button-container">
-        <button className="start-btn" onClick={() => setIsRunning(true)}>Start</button>
-        <button className="pause-btn" onClick={() => setIsRunning(false)}>Pause</button>
-        <button className="reset-btn" onClick={() => {setTimeLeft(1500); setIsRunning(false);}}>Reset</button>
+      <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
+        <div className="tomato-stem"></div>
+        <div className="tomato-content">
+          {timerState === 'initial' && <span className="start-text">START</span>}
+          {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
+          {timerState === 'paused' && (
+            <>
+              <div className="pause-icon">🍅</div>
+              <span className="small-time">{formatTime(timeLeft)}</span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
