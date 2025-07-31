@@ -52,20 +52,28 @@ function App() {
   return (
     <div className="App">
       <h1>Pomodoro Timer</h1>
-      <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
-        <div className="tomato-stem"></div>
-        <div className="tomato-content">
-          {timerState === 'initial' && <span className="start-text">START</span>}
-          {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
-          {timerState === 'paused' && (
-            <>
-              <div className="pause-icon">🍅</div>
-              <span className="small-time">{formatTime(timeLeft)}</span>
-            </>
-          )}
+
+      <div className="tomato-section">
+        <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
+          <div className="tomato-emoji">🍅</div>
+          <div className="tomato-content">
+            {timerState === 'initial' && <span className="start-text">START</span>}
+            {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
+            {timerState === 'paused' && (
+              <>
+                <div className="pause-icon">⏸</div>
+                <span className="small-time">{formatTime(timeLeft)}</span>
+              </>
+            )}
+          </div>
         </div>
+
+        <button className="reset-btn" onClick={handleReset}>Reset</button>
       </div>
+
+      <div></div> {/*For spacing purposes*/}
     </div>
+      
   );
 }
 
