@@ -3,9 +3,10 @@ import './App.css';
 
 function App() {
   // State variables
-  const [timeLeft, setTimeLeft] = useState(1500);
+  const [timeLeft, setTimeLeft] = useState(5); // Time on the timer, 1500 seconds = 25 minutes
   const [isRunning, setIsRunning] = useState(false);
   const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
+  const [pomoCount, setPomoCount] = useState(0);
 
   // Functions
   const formatTime = (seconds) => {
@@ -29,7 +30,7 @@ function App() {
   };
 
   const handleReset = () => {
-    setTimeLeft(1500);
+    setTimeLeft(5);
     setIsRunning(false);
     setTimerState('initial');
   };
@@ -40,9 +41,15 @@ function App() {
      * then decrease the timeLeft by one second */
     if (isRunning && timeLeft > 0) {
       const interval = setInterval(() => {
-        // Code runs every 1000ms(1 second)
-        setTimeLeft(prevTime => prevTime - 1);
-      }, 1000);
+        setTimeLeft(prevTime => {
+          if (prevTime === 1) {
+            console.log("Pomodoro completed!");
+            setIsRunning(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000); // Code runs every 1000ms(1 second)
 
       // Cleanup Function - runs when effect runs again or component unmounts
       return () => clearInterval(interval);
