@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
@@ -7,6 +7,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
   const [pomoCount, setPomoCount] = useState(0);
+  const completionRef = useRef(false);
 
   // Functions
   const formatTime = (seconds) => {
@@ -33,18 +34,27 @@ function App() {
     setTimeLeft(5);
     setIsRunning(false);
     setTimerState('initial');
+    completionRef.current = false;
   };
 
   // useEffect
   useEffect(() => { // Setup
+    console.log("useEffect running, timeLeft:", timeLeft, "isRunning:", isRunning);
     /**If isRunning and timeLeft are greater than 0
      * then decrease the timeLeft by one second */
     if (isRunning && timeLeft > 0) {
       const interval = setInterval(() => {
         setTimeLeft(prevTime => {
-          if (prevTime === 1) {
+          if (prevTime === 1 && !completionRef.current) {
             console.log("Pomodoro completed!");
+            completionRef.current = true; // Mark Completed
             setIsRunning(false);
+            // setPomoCount(prevCount => prevCount + 1);
+            setPomoCount(prevCount => {
+              const newCount = prevCount + 1;
+              console.log("Pomodoros earned: ", newCount);
+              return newCount;
+            });
             return 0;
           }
           return prevTime - 1;
