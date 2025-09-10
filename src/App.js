@@ -68,28 +68,28 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Pomodoro Timer</h1>
-
-      <div className="tomato-section">
-        <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
-          <div className="tomato-emoji">🍅</div>
-          <div className="tomato-content">
-            {timerState === 'initial' && <span className="start-text">START</span>}
-            {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
-            {timerState === 'paused' && <div className="pause-icon">⏸</div>}
+      <div className="timer-container">
+        <h1>Pomodoro Timer</h1>
+      
+        <div className="tomato-section">
+          <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
+            <div className="tomato-emoji">🍅</div>
+            <div className="tomato-content">
+              {timerState === 'initial' && <span className="start-text">START</span>}
+              {timerState === 'running' && <span className="timer-text">{formatTime(timeLeft)}</span>}
+              {timerState === 'paused' && <div className="pause-icon">⏸</div>}
+            </div>
           </div>
-        </div>
 
-        {timerState === 'paused' && (
-          <div className="external-timer">{formatTime(timeLeft)}</div>
-        )}
+          {timerState === 'paused' && (
+            <div className="external-timer">{formatTime(timeLeft)}</div>
+          )}
+        </div>
 
         <button className="reset-btn" onClick={handleReset}>Reset</button>
       </div>
-
-      <div></div> {/*For spacing purposes*/}
-    </div>
-      
+      <div className="pomo-counter">🍅 {pomoCount}</div>
+    </div> 
   );
 }
 
