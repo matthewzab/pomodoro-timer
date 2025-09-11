@@ -8,6 +8,7 @@ function App() {
   const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
   const [pomoCount, setPomoCount] = useState(0);
   const completionRef = useRef(false);
+  const [completionPopUp, setCompletionPopUp] = useState(false);
 
   // Functions
   const formatTime = (seconds) => {
@@ -35,6 +36,7 @@ function App() {
     setIsRunning(false);
     setTimerState('initial');
     completionRef.current = false;
+    setCompletionPopUp(false);
   };
 
   // useEffect
@@ -49,12 +51,14 @@ function App() {
             console.log("Pomodoro completed!");
             completionRef.current = true; // Mark Completed
             setIsRunning(false);
-            // setPomoCount(prevCount => prevCount + 1);
-            setPomoCount(prevCount => {
-              const newCount = prevCount + 1;
-              console.log("Pomodoros earned: ", newCount);
-              return newCount;
-            });
+            setCompletionPopUp(true);
+            setPomoCount(prevCount => prevCount + 1);
+            /* Check incriment of pomoCount using consolelog code below */
+            // setPomoCount(prevCount => {
+            //   const newCount = prevCount + 1;
+            //   console.log("Pomodoros earned: ", newCount);
+            //   return newCount;
+            // });
             return 0;
           }
           return prevTime - 1;
@@ -68,9 +72,10 @@ function App() {
 
   return (
     <div className="App">
+
       <div className="timer-container">
+        <div className="pomo-counter">🍅 {pomoCount}</div>
         <h1>Pomodoro Timer</h1>
-      
         <div className="tomato-section">
           <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
             <div className="tomato-emoji">🍅</div>
@@ -80,15 +85,23 @@ function App() {
               {timerState === 'paused' && <div className="pause-icon">⏸</div>}
             </div>
           </div>
-
           {timerState === 'paused' && (
             <div className="external-timer">{formatTime(timeLeft)}</div>
           )}
         </div>
-
         <button className="reset-btn" onClick={handleReset}>Reset</button>
       </div>
-      <div className="pomo-counter">🍅 {pomoCount}</div>
+
+      {completionPopUp === true && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h2>Congratulations!</h2><br></br>
+            <p>You completed a Pomodoro! 🍅</p>
+            <p>Enjoy a 5 minute break!</p><br></br>
+            <button className="continue-popupbtn" onClick={handleReset}>I did it!</button>
+          </div>
+        </div>
+      )}
     </div> 
   );
 }
