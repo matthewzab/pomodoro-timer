@@ -3,12 +3,15 @@ import './App.css';
 
 function App() {
   // State variables
-  const [timeLeft, setTimeLeft] = useState(5); // Time on the timer, 1500 seconds = 25 minutes
+  const [timeLeft, setTimeLeft] = useState(3); // Time on the timer, 1500 seconds = 25 minutes
   const [isRunning, setIsRunning] = useState(false);
   const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
   const [pomoCount, setPomoCount] = useState(0);
   const completionRef = useRef(false);
   const [completionPopUp, setCompletionPopUp] = useState(false);
+  const [todaysHarvest, setTodaysHarvest] = useState(0)
+  const [lastCompletionDate, setLastCompletionDate] = useState(new Date().toDateString());
+  // const [testDate, setTestDate] = useState(new Date().toString()); // Test a new date using this code
 
   // Functions
   const formatTime = (seconds) => {
@@ -32,7 +35,7 @@ function App() {
   };
 
   const handleReset = () => {
-    setTimeLeft(5);
+    setTimeLeft(3);
     setIsRunning(false);
     setTimerState('initial');
     completionRef.current = false;
@@ -52,6 +55,20 @@ function App() {
             completionRef.current = true; // Mark Completed
             setIsRunning(false);
             setCompletionPopUp(true);
+            const today = new Date().toDateString();
+            console.log("Today: ", today);
+            console.log("Last completion date: ", lastCompletionDate);
+            console.log("Is new day? ", lastCompletionDate !== today);
+            if (lastCompletionDate !== today) {
+              // It's a new day! Reset today's harvest!
+              setTodaysHarvest(1);
+              setLastCompletionDate(today);
+            }
+            else {
+              // Same day, increment
+              setTodaysHarvest(prevHarvest => prevHarvest + 1);
+            }
+            // Always increment pomoCount regardless of new day or not
             setPomoCount(prevCount => prevCount + 1);
             /* Check incriment of pomoCount using consolelog code below */
             // setPomoCount(prevCount => {
@@ -73,6 +90,15 @@ function App() {
   return (
     <div className="App">
 
+      <div className="harvest-container">
+        <h2>Today's Harvest</h2>
+        <div className="pomo-display">
+          {Array.from({ length: todaysHarvest }, (_, index) => (
+            <span key={index} className="harvest-pomo">🍅</span>
+          ))}
+        </div>
+      </div>
+
       <div className="timer-container">
         <div className="pomo-counter">🍅 {pomoCount}</div>
         <h1>Pomodoro Timer</h1>
@@ -90,6 +116,11 @@ function App() {
           )}
         </div>
         <button className="reset-btn" onClick={handleReset}>Reset</button>
+      </div>
+
+      <div className="empty-container">
+        {/* Test new date */}
+        {/* <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test New Day</button> */}
       </div>
 
       {completionPopUp === true && (

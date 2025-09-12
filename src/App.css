@@ -1,4 +1,3 @@
-/* CSS Custom Properties (Variables) */
 :root {
   --primary-red: #F54927;
   --off-white: #f7f5f3;
@@ -8,7 +7,6 @@
   --camel: #DCC7AC;
 }
 
-/* Reset default styles and set up the page */
 * {
   margin: 0;
   padding: 0;
@@ -31,10 +29,34 @@ body {
 }
 
 .harvest-container {
-  position: relative;
   width: 400px;
-  /* border: 2px solid purple; */
-  left: 100px;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  background-color: var(--pure-white);
+  border-radius: 0px 15px 15px 0px;
+  box-shadow: 0 5px 15px var(--shadow-color);
+  align-self: flex-start;
+  margin-top: 25vh;
+  
+}
+
+.harvest-container h2 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);  /* Opaque black line */
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;  
+  color: var(--primary-red)
+}
+
+.pomo-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.harvest-pomo {
+  font-size: 1.5rem;
 }
 
 .timer-container {
@@ -193,7 +215,10 @@ h1 {
 .pomo-counter:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--shadow-color);
+}
 
+.empty-container {
+  width: 400px;
 }
 
 .popup-overlay {
