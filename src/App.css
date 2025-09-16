@@ -73,12 +73,66 @@ body {
   padding: 30px;
 }
 
+.pomo-counter {
+  position: absolute;
+  top: 42px;
+  right: 0px;
+  font-size: 1.3rem;
+  padding: 0.3rem 0.7rem;
+  background-color: var(--off-white);
+  border: 2px solid var(--camel);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pomo-counter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.streak-counter {
+  position: absolute;
+  top: 92px;
+  right: 0px;
+  font-size: 1.3rem;
+  padding: 0.3rem 0.7rem;
+  background-color: var(--off-white);
+  border: 2px solid var(--camel);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.streak-counter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.streak-counter.inactive {
+  opacity: 0.25;
+}
+
+.streak-counter.active {
+  opacity: 1;
+}
+
 /* Main heading */
 h1 {
   font-size: 2.7rem;
   color: var(--primary-red);
   font-weight: 300;
   letter-spacing: 2px;
+}
+
+.tomato-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* border: 2px solid blue; */
+  gap: 5rem;
+  height: 400px;
+  width: 400px;
 }
 
 /* Tomato Container */
@@ -98,16 +152,6 @@ h1 {
 
 .tomato:active {
   transform: scale(0.95);
-}
-
-.tomato-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* border: 2px solid blue; */
-  gap: 5rem;
-  height: 400px;
-  width: 400px;
 }
 
 /* Large Tomato Emoji */
@@ -163,12 +207,6 @@ h1 {
   margin: -1rem 0;
 }
 
-/* Pulse animation for pause state */
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
 /* Reset Button */
 .reset-btn {
   padding: 0.8rem 1.5rem;
@@ -197,24 +235,6 @@ h1 {
 
 .tomato.paused .tomato-emoji {
   filter: drop-shadow(0 10px 20px var(--shadow-color)) brightness(0.9);
-}
-
-.pomo-counter {
-  position: absolute;
-  top: 42px;
-  right: 0px;
-  font-size: 1.3rem;
-  padding: 0.3rem 0.7rem;
-  background-color: var(--off-white);
-  border: 2px solid var(--camel);
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pomo-counter:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .empty-container {
@@ -262,6 +282,12 @@ h1 {
   color: var(--pure-white);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+/* Pulse animation for pause state */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 @keyframes subtle-glow {

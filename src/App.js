@@ -11,7 +11,10 @@ function App() {
   const [completionPopUp, setCompletionPopUp] = useState(false);
   const [todaysHarvest, setTodaysHarvest] = useState(0)
   const [lastCompletionDate, setLastCompletionDate] = useState(new Date().toDateString());
-  // const [testDate, setTestDate] = useState(new Date().toString()); // Test a new date using this code
+  const [testDate, setTestDate] = useState(new Date().toDateString()); // TESTING: Test a new date using this code, comment out when done testing
+  const [lastDailyChallenge, setLastDailyChallenge] = useState(null);
+  const [streakCount, setStreakCount] = useState(0);
+  const [isStreakActive, setIsStreakActive] = useState(false);
 
   // Functions
   const formatTime = (seconds) => {
@@ -42,9 +45,9 @@ function App() {
     setCompletionPopUp(false);
   };
 
-  // useEffect
-  useEffect(() => { // Setup
-    console.log("useEffect running, timeLeft:", timeLeft, "isRunning:", isRunning);
+  // Effect for timer completion logic
+  useEffect(() => { 
+    // console.log("useEffect running, timeLeft:", timeLeft, "isRunning:", isRunning);
     /**If isRunning and timeLeft are greater than 0
      * then decrease the timeLeft by one second */
     if (isRunning && timeLeft > 0) {
@@ -55,14 +58,15 @@ function App() {
             completionRef.current = true; // Mark Completed
             setIsRunning(false);
             setCompletionPopUp(true);
-            const today = new Date().toDateString();
+            const today = testDate; // TESTING: Changed new Date().toDateString() to be testDate, change back after testing
+            /* Check if it's a new day */
             console.log("Today: ", today);
             console.log("Last completion date: ", lastCompletionDate);
             console.log("Is new day? ", lastCompletionDate !== today);
-            if (lastCompletionDate !== today) {
+            if (lastCompletionDate !== today) { 
               // It's a new day! Reset today's harvest!
               setTodaysHarvest(1);
-              setLastCompletionDate(today);
+              setLastCompletionDate(testDate);
             }
             else {
               // Same day, increment
@@ -87,6 +91,46 @@ function App() {
     }
   }, [isRunning, timeLeft]); // Dependencies - effect runs when either is changed
 
+// Effect For keep track of completed daily challenge
+useEffect(() => {
+  if (todaysHarvest === 2) {
+    console.log("Daily Challenge Completed!");
+    const todayDate = new Date(testDate); // TESTING: added testDate, remove once done testing
+    const lastDate = new Date(lastDailyChallenge);
+
+    // Debugging logs to test streak incrementation logic
+    console.log("testDate string:", testDate);
+    console.log("todayDate object:", todayDate);
+    console.log("lastDailyChallenge string:", lastDailyChallenge);
+    console.log("lastDate object:", lastDate);
+    console.log("Date difference in ms:", todayDate - lastDate);
+    console.log("Date difference in days:", Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)));
+
+    if (lastDailyChallenge === null) {
+      // First completion and addition to streak
+      console.log("First daily challenge completed. Beginning streak!")
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(1);
+    } else if (Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)) === 1) { 
+      console.log("Daily Challenge completed consecutively, incrementing streak!")
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(prevStreak => {
+        const newStreak = prevStreak + 1;
+        if (newStreak >= 3) { setIsStreakActive(true); }
+        return newStreak;
+      });
+    } else {
+      console.log("Streak broken!")
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(1);
+      setIsStreakActive(false);
+    }
+    console.log("Current streakCount: ", streakCount);
+    console.log("Current isStreakActive: ", isStreakActive);
+  }
+}, [todaysHarvest]);
+
+
   return (
     <div className="App">
 
@@ -101,6 +145,7 @@ function App() {
 
       <div className="timer-container">
         <div className="pomo-counter">🍅 {pomoCount}</div>
+        <div className={`streak-counter ${isStreakActive ? 'active' : 'inactive'}`}>🔥 {streakCount}</div>
         <h1>Pomodoro Timer</h1>
         <div className="tomato-section">
           <div className={`tomato ${timerState}`} onClick={handleTomatoClick}>
@@ -120,7 +165,13 @@ function App() {
 
       <div className="empty-container">
         {/* Test new date */}
-        {/* <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test New Day</button> */}
+        {/* <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Date</button> */}
+        <button onClick={() => setTestDate("Wed Sep 17 2025")}>Test Day 2</button>
+        <button onClick={() => setTestDate("Thu Sep 18 2025")}>Test Day 3</button>
+        <button onClick={() => setTestDate("Fri Sep 19 2025")}>Test Day 4</button>
+        <button onClick={() => setTestDate("Sat Sep 20 2025")}>Test Day 5</button>
+        <button onClick={() => setTestDate("Sun Sep 21 2025")}>Test Day 6</button>
+        <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Broken Streak</button>
       </div>
 
       {completionPopUp === true && (
