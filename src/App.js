@@ -73,7 +73,7 @@ function App() {
               setTodaysHarvest(prevHarvest => prevHarvest + 1);
             }
             // Always increment pomoCount regardless of new day or not
-            setPomoCount(prevCount => prevCount + (isStreakActive ? 1 + streakCount : 1));
+            // setPomoCount(prevCount => prevCount + (isStreakActive ? 1 + streakCount : 1));
             // // Console logs for bonus tracking
             // if (isStreakActive) {
             //   console.log(`Streak bonus! Awarded 1 base + ${streakCount} pomodoros`)
@@ -95,51 +95,84 @@ function App() {
 useEffect(() => {
   const todayDate = new Date(testDate); // TESTING: added testDate, remove once done testing
   const lastDate = new Date(lastDailyChallenge);
-  // Debugging logs to test streak incrementation logic
-  console.log("testDate string:", testDate);
-  console.log("todayDate object:", todayDate);
-  console.log("lastDailyChallenge string:", lastDailyChallenge);
-  console.log("lastDate object:", lastDate);
-  console.log("Date difference in ms:", todayDate - lastDate);
-  console.log("Date difference in days:", Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)));
   
-  if (todaysHarvest === 1) {
-    // Check if streak exists or should be broken
+  // Debugging logs to test streak incrementation logic
+  // console.log("testDate string:", testDate);
+  // console.log("todayDate object:", todayDate);
+  // console.log("lastDailyChallenge string:", lastDailyChallenge);
+  // console.log("lastDate object:", lastDate);
+  // console.log("Date difference in ms:", todayDate - lastDate);
+  // console.log("Date difference in days:", Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)));
+  
+  if (todaysHarvest === 0) {
+    console.log("Screen has loaded. User has not completed Pomodoro yet. Do nothing.");
+  } 
+  else if (todaysHarvest === 1) {
+    // Day 1
     if (lastDailyChallenge === null) {
-        // First completion and addition to streak
-        console.log("First daily challenge completed. Beginning streak!")
-        setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
-        setStreakCount(1);
-    } else if (Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)) > 1) {
-        console.log("Harvest 1: Streak broken!");
-        setLastDailyChallenge(testDate);
-        setStreakCount(1);
-        setIsStreakActive(false);
-      }
-  } else if (todaysHarvest === 2) {
-      console.log("Daily Challenge Completed!");
-
-      if (Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)) === 0) {
-        // Streak just began! Do nothing
-        console.log("Streak just began do nothing!")
-      } 
-      else if (Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)) === 1) { 
-        console.log("Daily Challenge completed consecutively, incrementing streak!")
-        setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
-        setStreakCount(prevStreak => {
-          const newStreak = prevStreak + 1;
-          if (newStreak >= 3) { setIsStreakActive(true); }
-          return newStreak;
-        });
-      } else {
-        console.log("Harvest 2: Streak broken!")
-        setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
-        setStreakCount(1);
-        setIsStreakActive(false);
-      } 
+      // There is no streak. Daily challenge has never been completed.
+      console.log("Streak does not exist. Awarding 1 pomo")
+      setPomoCount(prevCount => prevCount + 1);
+    } 
+    // Days 2+, lastDailyChallenge should be set by now
+    else if (Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)) === 1) {
+      /* If there is a streak, check to see if it is consecutive.
+       * If it is consecutive award pomodoro + streak bonus if the streak is active */
+      console.log("Streak exists! Streak is consecutive! Incrementing pomoCount accoardingly")
+      setPomoCount(prevCount => prevCount + (isStreakActive ? 1 + streakCount : 1));
+    } else {
+      // Streak is not consecutive, todayDate - lastDate != 1, Streak is broken and should be set as if it no longer exists.
+      console.log("Streak exists but is not consecutive! Awarding 1 pomo. Setting isStreakActive(false)")
+      setIsStreakActive(false);
+      setStreakCount(0);
+      setLastDailyChallenge(null);
+      setPomoCount(prevCount => prevCount + 1);
+    } 
+  } 
+  else if (todaysHarvest === 2) { 
+    // Daily challenge has been completed! lastDailyChallenge should be set
+    // Day 1
+    if (lastDailyChallenge === null) {
+      // First daily challenge completed!
+      console.log("First daily challenge completed! Congratulations!");
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(1);
+      setPomoCount(prevCount => prevCount + 1);
     }
-    console.log("Current streakCount: ", streakCount);
-    console.log("Current isStreakActive: ", isStreakActive);
+    // Day 2
+    else if (streakCount === 1) {
+      console.log("Day 2: Daily challenge completed!");
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(prevStreak => prevStreak + 1);
+      setPomoCount(prevCount => prevCount + 1);
+    }
+    // Day 3
+    else if (streakCount === 2) {
+      // Streak is being incremented here and bonus pomos should be awarded
+      console.log("Day 3: Daily Challenge completed! Streak is now active. 1 + 3 pomos awarded");
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setIsStreakActive(true);
+      setStreakCount(prevStreak => prevStreak + 1);
+      setPomoCount(prevCount => prevCount + 1 + 3); // Manually awarding 3 bonus pomodoros
+    }
+    // Days 4+
+    else {
+      // Streak is being incremented here. Bonus pomos of the next streak bonus should be awarded here.
+      console.log(`Days 4+: Daily Challenge completed! Streak is already active. 1 + ${streakCount + 1} pomos awarded!`)
+      setLastDailyChallenge(testDate); // TESTING: Changed new Date().toDateString() to be testDate, revert once testing is done
+      setStreakCount(prevStreak => prevStreak + 1);
+      setPomoCount(prevCount => prevCount + 1 + streakCount + 1); // Manually adding 1 extra pomo since accurate streakCount is not readily available in this call.
+    }
+  }
+  else {
+    // Any extra pomodoros earned after completion of daily challenge. State variables used here are readily available
+    setPomoCount(prevCount => prevCount + (isStreakActive ? 1 + streakCount : 1));
+    if (isStreakActive) {
+      console.log(`Streak is active. 1 + ${streakCount} pomos awarded`);
+    } else {
+      console.log("Streak is not active. 1 pomo awarded");
+    }
+  }
 }, [todaysHarvest]);
 
 
@@ -178,11 +211,11 @@ useEffect(() => {
       <div className="empty-container">
         {/* Test new date */}
         {/* <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Date</button> */}
-        <button onClick={() => setTestDate("Wed Sep 17 2025")}>Test Day 2</button>
-        <button onClick={() => setTestDate("Thu Sep 18 2025")}>Test Day 3</button>
-        <button onClick={() => setTestDate("Fri Sep 19 2025")}>Test Day 4</button>
-        <button onClick={() => setTestDate("Sat Sep 20 2025")}>Test Day 5</button>
-        <button onClick={() => setTestDate("Sun Sep 21 2025")}>Test Day 6</button>
+        <button onClick={() => setTestDate("Thu Sep 18 2025")}>Test Day 2</button>
+        <button onClick={() => setTestDate("Fri Sep 19 2025")}>Test Day 3</button>
+        <button onClick={() => setTestDate("Sat Sep 20 2025")}>Test Day 4</button>
+        <button onClick={() => setTestDate("Sun Sep 21 2025")}>Test Day 5</button>
+        <button onClick={() => setTestDate("Mon Sep 22 2025")}>Test Day 6</button>
         <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Broken Streak</button>
       </div>
 
