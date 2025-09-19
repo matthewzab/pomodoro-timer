@@ -15,6 +15,8 @@ function App() {
   const [lastDailyChallenge, setLastDailyChallenge] = useState(null);
   const [streakCount, setStreakCount] = useState(0);
   const [isStreakActive, setIsStreakActive] = useState(false);
+  const [streakInactivePopUp, setStreakInactivePopUp] = useState(false);
+  const [streakActivePopUp, setStreakActivePopUp] = useState(false);
 
   // Functions
   const formatTime = (seconds) => {
@@ -45,6 +47,16 @@ function App() {
     setCompletionPopUp(false);
   };
 
+  const handleStreakInactiveClose = () => {
+    setStreakInactivePopUp(false);
+    setCompletionPopUp(true);
+  }
+
+  const handleStreakActiveClose = () => {
+    setStreakActivePopUp(false);
+    setCompletionPopUp(true);
+  }
+
   // Effect for timer completion 
   useEffect(() => { 
     // console.log("useEffect running, timeLeft:", timeLeft, "isRunning:", isRunning);
@@ -57,29 +69,35 @@ function App() {
             console.log("Pomodoro completed!");
             completionRef.current = true; // Mark Completed
             setIsRunning(false);
-            setCompletionPopUp(true);
             const today = testDate; // TESTING: Changed new Date().toDateString() to be testDate, change back after testing
             /* Check if it's a new day */
-            // console.log("Today: ", today);
-            // console.log("Last completion date: ", lastCompletionDate);
-            // console.log("Is new day? ", lastCompletionDate !== today);
-            if (lastCompletionDate !== today) { 
-              // It's a new day! Reset today's harvest!
+            console.log("Today: ", today);
+            console.log("Last completion date: ", lastCompletionDate);
+            console.log("Is new day? ", lastCompletionDate !== today);
+            if (pomoCount === 0) {
+              // Users first pomo! Last completion date will be equal to today because its day 1.
+              console.log("User's First EVER Pomo Awarded!");
               setTodaysHarvest(1);
               setLastCompletionDate(testDate);
+              setCompletionPopUp(true);
+            }
+            else if (lastCompletionDate !== today) { 
+              // It's a new day! Reset today's harvest!
+              console.log("It's a new day we are starting a new harvest");
+              setTodaysHarvest(1);
+              setLastCompletionDate(testDate);
+              setCompletionPopUp(true);
             }
             else {
               // Same day, increment
+              console.log("It's not a new day we are incrementing");
+              if (todaysHarvest === 1) {
+                ((streakCount < 2) ? setStreakInactivePopUp(true) : setStreakActivePopUp(true));
+              } else {
+                setCompletionPopUp(true);
+              }
               setTodaysHarvest(prevHarvest => prevHarvest + 1);
             }
-            // Always increment pomoCount regardless of new day or not
-            // setPomoCount(prevCount => prevCount + (isStreakActive ? 1 + streakCount : 1));
-            // // Console logs for bonus tracking
-            // if (isStreakActive) {
-            //   console.log(`Streak bonus! Awarded 1 base + ${streakCount} pomodoros`)
-            // } else {
-            //   console.log("Standard completion: 1 pomodoro awarded")
-            // }
             return 0;
           }
           return prevTime - 1;
@@ -211,19 +229,50 @@ useEffect(() => {
       <div className="empty-container">
         {/* Test new date */}
         {/* <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Date</button> */}
-        <button onClick={() => setTestDate("Thu Sep 18 2025")}>Test Day 2</button>
-        <button onClick={() => setTestDate("Fri Sep 19 2025")}>Test Day 3</button>
-        <button onClick={() => setTestDate("Sat Sep 20 2025")}>Test Day 4</button>
-        <button onClick={() => setTestDate("Sun Sep 21 2025")}>Test Day 5</button>
-        <button onClick={() => setTestDate("Mon Sep 22 2025")}>Test Day 6</button>
+        <button onClick={() => setTestDate("Fri Sep 19 2025")}>Test Day 2</button>
+        <button onClick={() => setTestDate("Sat Sep 20 2025")}>Test Day 3</button>
+        <button onClick={() => setTestDate("Sun Sep 21 2025")}>Test Day 4</button>
+        <button onClick={() => setTestDate("Mon Sep 22 2025")}>Test Day 5</button>
+        <button onClick={() => setTestDate("Tue Sep 23 2025")}>Test Day 6</button>
         <button onClick={() => setTestDate("Sat Oct 01 2025")}>Test Broken Streak</button>
       </div>
+      
+      {streakInactivePopUp === true && (
+        <div className="popup-overlay">
+          <div className="streak-popup-box">
+            <h2>Daily Challenge Completed!</h2><br></br>
+            <p className="number-award">+1 🔥</p><br />
+            <p>Reach a streak of 🔥3 to earn a streak bonus! 🍅🍅🍅</p><br></br>
+            <button className="continue-popupbtn" onClick={handleStreakInactiveClose}>Woohoo!</button>
+          </div>
+        </div>
+      )}
+
+      {streakActivePopUp === true && (
+        <div className="popup-overlay">
+          <div className="streak-popup-box">
+            <h2>Daily Challenge Completed!</h2>
+            <h3 className="streak-color">Streak Bonus ON!</h3><br></br>
+            <p className="number-award">+1 🔥</p><br />
+            <p>Complete the daily challenge again tomorrow to keep your streak! 🍅🍅🍅</p><br></br>
+            <button className="continue-popupbtn" onClick={handleStreakActiveClose}>Woohoo!</button>
+          </div>
+        </div>
+      )}
 
       {completionPopUp === true && (
         <div className="popup-overlay">
           <div className="popup-box">
             <h2>Congratulations!</h2><br></br>
             <p>You completed a Pomodoro! 🍅</p>
+            <p>You've earned: </p><br></br>
+            <div>
+              {isStreakActive ? (
+                <p className="number-award">1 <span className="streak-color">+ {streakCount}</span> 🍅🍅🍅</p>
+              ) : (
+                <p className="number-award">+1 🍅</p>
+              )}
+            </div><br></br>
             <p>Enjoy a 5 minute break!</p><br></br>
             <button className="continue-popupbtn" onClick={handleReset}>I did it!</button>
           </div>
