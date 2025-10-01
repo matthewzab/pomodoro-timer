@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import engine, get_db, Base
 from models import User
-from auth_utils import create_user
+from auth_utils import create_user, verify_password
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -19,39 +19,18 @@ def health_check():
     return {"status": "healthy"}
 
 # Get the registration data in JSON format
-class UserRegister(BaseModel):
+class UserAccount(BaseModel):
     email: str
     password: str
 
 # Register user endpoint
 @app.post("/register")
-def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
+def register_user(user_data: UserAccount, db: Session = Depends(get_db)):
     try:
         user = create_user(db, user_data.email, user_data.password)
         return {"message": "User created successfulyy!", "user_id": user.id}
     except ValueError as e:
         raise HTTPException(status_code = 400, detail = str(e))
-
-# Test endpoint to create a user
-@app.post("/test-user")
-def create_test_user(db: Session = Depends(get_db)):
-    # Check if test user already exists
-    existing_user = db.query(User).filter(User.email == "test@example.com").first()
-    if existing_user:
-        return {"message": "Test user already exists", "user_id": existing_user.id}
-    
-    # Create new test user
-    test_user = User(
-        email="test@example.com",
-        hashed_password="fake_hashed_password",  # Implement real hashing later
-        total_pomodoros=5,
-        current_streak=2
-    )
-    db.add(test_user)
-    db.commit()
-    db.refresh(test_user)
-    
-    return {"message": "Test user created!", "user_id": test_user.id}
 
 # Test endpoint to get user data
 @app.get("/user/{user_id}")
@@ -67,3 +46,16 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         "current_streak": user.current_streak,
         "created_at": user.created_at
     }
+
+# Login endpoint
+@app.post("/login")
+def login(user_data: UserAccount, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if not existing_user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    result = verify_password(user_data.password, existing_user.hashed_password)
+    if result:
+        return {"message": "Successful login!", "user_id": existing_user.id}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid email or password")

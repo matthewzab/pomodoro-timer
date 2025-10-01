@@ -9,10 +9,10 @@ engine = create_engine(
     connect_args={"check_same_thread": False}  # Needed for SQLite
 )
 
-# Create a session factory
+# Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for our database models
+# Base class for database models
 Base = declarative_base()
 
 # Dependency to get database session
