@@ -1,3 +1,7 @@
+# Pomodoro Timer App
+
+📚 **Full Project Documentation**: https://pouncing-engineer-050.notion.site/Pomodoro-Digital-Journal-26beaf9eefd3802a9e45cb79303f9bd2?source=copy_link
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
