@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from database import engine, get_db, Base
 from models import User
+from auth_utils import create_user
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -15,6 +17,20 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+# Get the registration data in JSON format
+class UserRegister(BaseModel):
+    email: str
+    password: str
+
+# Register user endpoint
+@app.post("/register")
+def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
+    try:
+        user = create_user(db, user_data.email, user_data.password)
+        return {"message": "User created successfulyy!", "user_id": user.id}
+    except ValueError as e:
+        raise HTTPException(status_code = 400, detail = str(e))
 
 # Test endpoint to create a user
 @app.post("/test-user")

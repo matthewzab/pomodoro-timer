@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# SQLite database URL - this creates a file called "pomodoro.db"
 SQLALCHEMY_DATABASE_URL = "sqlite:///./pomodoro.db"
 
 # Create the database engine
