@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import engine, get_db, Base
 from models import User
-from auth_utils import create_user, verify_password
+from auth_utils import create_user, verify_password, create_access_token, get_current_user
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -56,6 +56,18 @@ def login(user_data: UserAccount, db: Session = Depends(get_db)):
     
     result = verify_password(user_data.password, existing_user.hashed_password)
     if result:
-        return {"message": "Successful login!", "user_id": existing_user.id}
+        token = create_access_token(existing_user.id)
+        return {"access_token": token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+# Endpoint to retrive information about current user
+@app.get("/me")
+def get_my_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "total_pomodoros": current_user.total_pomodoros,
+        "current_streak": current_user.current_streak,
+        "created_at": current_user.created_at
+    }

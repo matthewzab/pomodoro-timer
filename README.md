@@ -1,6 +1,8 @@
 # Pomodoro Timer App
 
-📚 **Full Project Documentation**: https://pouncing-engineer-050.notion.site/Pomodoro-Digital-Journal-26beaf9eefd3802a9e45cb79303f9bd2?source=copy_link
+📚 **Digital Journal**: https://pouncing-engineer-050.notion.site/Pomodoro-Digital-Journal-26beaf9eefd3802a9e45cb79303f9bd2?source=copy_link
+
+Above is the digital journal I created while working on this project. Inside you will find all of my learning, discovering, and thought process throughout development of the project. Please feel free to access and go inside of my mind as I worked through the challenges of creating this app!
 
 # Getting Started with Create React App
 
