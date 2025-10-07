@@ -14,5 +14,8 @@ class User(Base):
     # Pomodoro stats
     total_pomodoros = Column(Integer, default=0)
     current_streak = Column(Integer, default=0)
-    last_completion_date = Column(String)
-    last_daily_challenge_date = Column(String)
+    last_completion_date = Column(String, nullable=True)
+    last_daily_challenge_date = Column(String, nullable=True)
+
+    # Sync tracking
+    last_sync = Column(DateTime(timezone=True), nullable=True)

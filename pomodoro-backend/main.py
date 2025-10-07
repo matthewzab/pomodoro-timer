@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from datetime import datetime, timezone
 from database import engine, get_db, Base
 from models import User
 from auth_utils import create_user, verify_password, create_access_token, get_current_user
@@ -10,6 +11,26 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Pomodoro Timer API")
 
+# Pydantic models
+class UserAccount(BaseModel):
+    email: str
+    password: str
+
+class PomodoroCompletion(BaseModel):
+    pomos_earned: int
+    streak_count: int
+    last_completion_date: str | None = None
+    last_daily_challenge_date: str | None = None
+
+class SyncSession(BaseModel):
+    pomos_to_add: int
+    current_streak: int
+    last_completion_date: str | None = None
+    last_daily_challenge_date: str | None = None
+
+# Endpoints
+
+# --- Health/Info endpoints --- 
 @app.get("/")
 def read_root():
     return {"message": "Pomodoro Timer API is running!"}
@@ -18,38 +39,32 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 
-# Get the registration data in JSON format
-class UserAccount(BaseModel):
-    email: str
-    password: str
-
-# Register user endpoint
+# --- Authentication endpoints ---
 @app.post("/register")
-def register_user(user_data: UserAccount, db: Session = Depends(get_db)):
+def register_user(
+    user_data: UserAccount,
+    db: Session = Depends(get_db)
+):
+    """
+    Registers a new user into the database.
+    Called when a user creates an account.
+    """
     try:
         user = create_user(db, user_data.email, user_data.password)
         return {"message": "User created successfulyy!", "user_id": user.id}
     except ValueError as e:
         raise HTTPException(status_code = 400, detail = str(e))
 
-# Test endpoint to get user data
-@app.get("/user/{user_id}")
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return {
-        "id": user.id,
-        "email": user.email,
-        "total_pomodoros": user.total_pomodoros,
-        "current_streak": user.current_streak,
-        "created_at": user.created_at
-    }
-
-# Login endpoint
 @app.post("/login")
-def login(user_data: UserAccount, db: Session = Depends(get_db)):
+def login(
+    user_data: UserAccount,
+    db: Session = Depends(get_db)
+):
+    """
+    Login into an existing user account.
+    Creates a token for the user to use during their session.
+    Called when a user logins into there account.
+    """
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if not existing_user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -61,13 +76,93 @@ def login(user_data: UserAccount, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-# Endpoint to retrive information about current user
-@app.get("/me")
-def get_my_profile(current_user: User = Depends(get_current_user)):
+# --- User endpoints ---
+@app.get("/user/{user_id}")
+def get_user(
+    user_id: int, 
+    db: Session = Depends(get_db)
+):
+    """
+    Find any user within the database and reveal their stats using their user_id.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "total_pomodoros": current_user.total_pomodoros,
-        "current_streak": current_user.current_streak,
-        "created_at": current_user.created_at
+        "id": user.id,
+        "email": user.email,
+        "created_at": user.created_at,
+        "total_pomodoros": user.total_pomodoros,
+        "current_streak": user.current_streak,
+        "last_completion_date": user.last_completion_date,
+        "last_daily_challenge_date": user.last_daily_challenge_date
     }
+
+@app.get("/stats")
+def get_stats(
+    user: User = Depends(get_current_user)
+):
+    """
+    Get the authenticated user's pomodoro statistics.
+    Called when the app opens to load their data after logging in.
+    """
+    return {
+        "id": user.id,
+        "email": user.email,
+        "total_pomodoros": user.total_pomodoros,
+        "current_streak": user.current_streak,
+        "last_completion_date": user.last_completion_date,
+        "last_daily_challenge_date": user.last_daily_challenge_date
+    }
+
+# --- Pomodoro/sync endpoints ---
+@app.post("/pomodoro/complete")
+def complete_pomodoro(
+    completion: PomodoroCompletion,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Records a completed pomodoro for the authenticated user.
+    Updates total_pomodoros, current_streak, last_completion_date, last_daily_challenge_date.
+    """
+    user.total_pomodoros += completion.pomos_earned
+    user.current_streak = completion.streak_count
+    user.last_completion_date = completion.last_completion_date
+    user.last_daily_challenge_date = completion.last_daily_challenge_date
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True,
+            "total_pomodoros": user.total_pomodoros,
+            "current_streak": user.current_streak,
+            "last_completion_date": user.last_completion_date,
+            "last_daily_challenge": user.last_daily_challenge_date}
+
+@app.post("/sync-session")
+def sync_session(
+    session_data: SyncSession,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Syncs guest session data when user registers.
+    Adds guest stats to their new account.
+    """
+    user.total_pomodoros += session_data.pomos_to_add
+    user.current_streak = session_data.streak_count
+    user.last_completion_date = session_data.last_completion_date
+    user.last_daily_challenge_date = session_data.last_daily_challenge_date
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True,
+            "total_pomodoros": user.total_pomodoros,
+            "current_streak": user.current_streak,
+            "last_completion_date": user.last_completion_date,
+            "last_daily_challenge": user.last_daily_challenge_date}
