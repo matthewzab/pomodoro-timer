@@ -18,12 +18,18 @@ class UserAccount(BaseModel):
 
 class PomodoroCompletion(BaseModel):
     pomos_earned: int
-    streak_count: int
+    current_streak: int
     last_completion_date: str | None = None
     last_daily_challenge_date: str | None = None
 
 class SyncSession(BaseModel):
     pomos_to_add: int
+    current_streak: int
+    last_completion_date: str | None = None
+    last_daily_challenge_date: str | None = None
+
+class SyncData(BaseModel):
+    total_pomodoros: int
     current_streak: int
     last_completion_date: str | None = None
     last_daily_challenge_date: str | None = None
@@ -128,7 +134,7 @@ def complete_pomodoro(
     Updates total_pomodoros, current_streak, last_completion_date, last_daily_challenge_date.
     """
     user.total_pomodoros += completion.pomos_earned
-    user.current_streak = completion.streak_count
+    user.current_streak = completion.current_streak
     user.last_completion_date = completion.last_completion_date
     user.last_daily_challenge_date = completion.last_daily_challenge_date
     
@@ -153,7 +159,7 @@ def sync_session(
     Adds guest stats to their new account.
     """
     user.total_pomodoros += session_data.pomos_to_add
-    user.current_streak = session_data.streak_count
+    user.current_streak = session_data.current_streak
     user.last_completion_date = session_data.last_completion_date
     user.last_daily_challenge_date = session_data.last_daily_challenge_date
 
@@ -166,3 +172,33 @@ def sync_session(
             "current_streak": user.current_streak,
             "last_completion_date": user.last_completion_date,
             "last_daily_challenge": user.last_daily_challenge_date}
+
+@app.put("/sync")
+def sync_stats(
+    sync_data: SyncData,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Background sync endpoint. Updates user stats if frontend data is newer.
+    Prevents data loss by only accepting updates where total_pomodoros >= current.
+    """
+    if(sync_data.total_pomodoros < user.total_pomodoros):
+        raise HTTPException(status_code=400, detail="Sync Rejected. Possible data loss detected.")
+    
+    user.total_pomodoros = sync_data.total_pomodoros
+    user.current_streak = sync_data.current_streak
+    user.last_completion_date = sync_data.last_completion_date
+    user.last_daily_challenge_date = sync_data.last_daily_challenge_date
+    user.last_sync = datetime.now(timezone.utc)
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True,
+            "total_pomodoros": user.total_pomodoros,
+            "current_streak": user.current_streak,
+            "last_completion_date": user.last_completion_date,
+            "last_daily_challenge": user.last_daily_challenge_date,
+            "last_sync": user.last_sync}
