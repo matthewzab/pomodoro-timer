@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime, timezone
@@ -10,6 +11,15 @@ from auth_utils import create_user, verify_password, create_access_token, get_cu
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Pomodoro Timer API")
+
+# Prevents multiple origin errors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
 
 # Pydantic models
 class UserAccount(BaseModel):

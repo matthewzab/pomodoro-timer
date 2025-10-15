@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
-  // State variables
+  // --- State variables ---
   const [timeLeft, setTimeLeft] = useState(3); // Time on the timer, 1500 seconds = 25 minutes
   const [isRunning, setIsRunning] = useState(false);
   const [timerState, setTimerState] = useState('initial'); // Three different states, initial, running, paused
@@ -17,8 +17,67 @@ function App() {
   const [isStreakActive, setIsStreakActive] = useState(false);
   const [streakInactivePopUp, setStreakInactivePopUp] = useState(false);
   const [streakActivePopUp, setStreakActivePopUp] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
 
-  // Functions
+  // --- Functions ---
+  const API_URL = 'http://localhost:8000'; 
+  
+  const handleLogin = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email, password}),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
+      }
+
+      const data = await response.json();
+      console.log("Login successful!", data);
+
+      return {success: true, data};
+    } catch (error) {
+      console.error("Login error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const handleRegister = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email,password}),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Registration failed');
+      }
+
+      const data = await response.json();
+      console.log("Registration successful!", data);
+
+      return { success: true, data };
+    } catch (error) {
+      console.error("Registration error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+  };
+  
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -57,6 +116,18 @@ function App() {
     setCompletionPopUp(true);
   }
 
+  // --- Effects ---
+  // Effect that checks for existing token on app load
+  useEffect(() => {
+    const savedToken = localStorage.getItem('token');
+
+    if (savedToken) {
+      console.log("Found saved token:", savedToken);
+    } else {
+      console.log("No saved token found")
+    }
+  }, [])
+  
   // Effect for timer completion 
   useEffect(() => { 
     // console.log("useEffect running, timeLeft:", timeLeft, "isRunning:", isRunning);
@@ -113,14 +184,6 @@ function App() {
 useEffect(() => {
   const todayDate = new Date(testDate); // TESTING: added testDate, remove once done testing
   const lastDate = new Date(lastDailyChallenge);
-  
-  // Debugging logs to test streak incrementation logic
-  // console.log("testDate string:", testDate);
-  // console.log("todayDate object:", todayDate);
-  // console.log("lastDailyChallenge string:", lastDailyChallenge);
-  // console.log("lastDate object:", lastDate);
-  // console.log("Date difference in ms:", todayDate - lastDate);
-  // console.log("Date difference in days:", Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24)));
   
   if (todaysHarvest === 0) {
     console.log("Screen has loaded. User has not completed Pomodoro yet. Do nothing.");
@@ -192,7 +255,6 @@ useEffect(() => {
     }
   }
 }, [todaysHarvest]);
-
 
   return (
     <div className="App">
@@ -278,6 +340,8 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
     </div> 
   );
 }
